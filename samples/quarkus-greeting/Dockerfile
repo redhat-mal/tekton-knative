@@ -1,5 +1,4 @@
-#FROM quay.io/rhdevelopers/quarkus-java-builder:graal-1.0.0-rc15 as builder
-FROM registry.redhat.io/openjdk/openjdk-11-rhel7
+FROM image-registry.openshift-image-registry.svc:5000/openshift/java:11
 COPY . /project
 WORKDIR /project
 # uncomment this to set the MAVEN_MIRROR_URL of your choice, to make faster builds
