@@ -1,0 +1,73 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: python-standard-{{ .Values.appName }}
+  namespace: {{ .Values.namespace }}
+spec:
+  params:
+    - default: {{ .Values.appName }}
+      name: APP_NAME
+      type: string
+    - default: 'https://github.com/redhat-mal/python-hello-world.git'
+      name: GIT_REPO
+      type: string
+    - default: main
+      name: GIT_REVISION
+      type: string
+    - default: >-
+        image-registry.openshift-image-registry.svc:5000/{{ .Values.namespace }}/{{ .Values.appName }}
+      name: IMAGE_NAME
+      type: string
+  tasks:
+    - name: fetch-repository
+      params:
+        - name: url
+          value: $(params.GIT_REPO)
+        - name: revision
+          value: $(params.GIT_REVISION)
+        - name: deleteExisting
+          value: 'true'
+        - name: subdirectory
+          value: ''
+      taskRef:
+        kind: ClusterTask
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: workspace
+    - name: build
+      params:
+        - name: IMAGE
+          value: $(params.IMAGE_NAME)
+        - name: TLSVERIFY
+          value: 'false'
+        - name: PATH_CONTEXT
+          value: 'src'
+      runAfter:
+        - fetch-repository
+      taskRef:
+        kind: ClusterTask
+        name: s2i-python-3
+      workspaces:
+        - name: source
+          workspace: workspace
+    - name: kn-deploy
+      params:
+        - name: ARGS
+          value:
+            - service 
+            - create
+            - $(params.APP_NAME)
+            - --force
+            - "--image=$(params.IMAGE_NAME)"
+      runAfter:
+        - build
+      taskRef:
+        kind: ClusterTask
+        name: kn
+  workspaces:
+    - name: workspace
+
+
+
