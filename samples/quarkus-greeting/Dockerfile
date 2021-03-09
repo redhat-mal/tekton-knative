@@ -6,14 +6,14 @@ WORKDIR /project
 # ARG MAVEN_MIRROR_URL=<your-maven-mirror-url>
 # e.g.
 #ARG MAVEN_MIRROR_URL=http://192.168.64.1:8081/nexus/content/groups/public
-RUN /opt/rh/rh-maven36/root/usr/bin/mvn -DskipTests package
+RUN /opt/rh/rh-maven36/root/usr/bin/mvn -DskipTests clean package
 
 #FROM fabric8/java-jboss-openjdk8-jdk:1.5.4
 #USER jboss
 ENV JAVA_APP_DIR=/deployments
+ENV JAVA_APP_JAR=/deployments/helloworld-java-quarkus-1.0-SNAPSHOT-runner.jar
 
-RUN cp /project/target/*-runner.jar /deployments/
-#COPY ./mvnw /deployments/
+RUN cp /project/target/*.jar /deployments/
 
 EXPOSE "8080"
 
