@@ -17,10 +17,10 @@ RUN ls -lrtR ./target/quarkus-app
 # Configure the JAVA_OPTIONS, you can add -XshowSettings:vm to also display the heap size.
 ENV JAVA_OPTIONS="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager"
 # We make four distinct layers so if there are application changes the library layers can be re-used
-COPY --chown=1001 ./target/quarkus-app/lib/ /deployments/lib/
-COPY --chown=1001 ./target/quarkus-app/*.jar /deployments/
-COPY --chown=1001 ./target/quarkus-app/app/ /deployments/app/
-COPY --chown=1001 ./target/quarkus-app/quarkus/ /deployments/quarkus/
+COPY --chown=1001 /project/target/quarkus-app/lib/ /deployments/lib/
+COPY --chown=1001 /project/target/quarkus-app/*.jar /deployments/
+COPY --chown=1001 /project/target/quarkus-app/app/ /deployments/app/
+COPY --chown=1001 /project/target/quarkus-app/quarkus/ /deployments/quarkus/
 
 WORKDIR /deployments
 
