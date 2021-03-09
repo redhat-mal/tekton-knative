@@ -12,9 +12,9 @@ RUN /opt/rh/rh-maven36/root/usr/bin/mvn -DskipTests package
 #USER jboss
 ENV JAVA_APP_DIR=/deployments
 
-RUN cp /project/target/*.jar /deployments/
-COPY ./mvnw /deployments/
+RUN cp /project/target/*.runner.jar /deployments/
+#COPY ./mvnw /deployments/
 
 EXPOSE "8080"
 
-ENTRYPOINT [ "/opt/rh/rh-maven36/root/usr/bin/mvn", "quarkus:dev" ]
+#ENTRYPOINT [ "/opt/rh/rh-maven36/root/usr/bin/mvn", "quarkus:dev" ]
