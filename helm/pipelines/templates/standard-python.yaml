@@ -12,6 +12,9 @@ spec:
     - default: 'https://github.com/redhat-mal/python-hello-world.git'
       name: GIT_REPO
       type: string
+    - name: GIT_CONTEXT_DIR
+      type: string
+      default: src
     - default: main
       name: GIT_REVISION
       type: string
@@ -36,6 +39,16 @@ spec:
       workspaces:
         - name: output
           workspace: workspace
+    #- name: debug
+    #  runAfter:
+    #  - fetch-repository
+    #  taskRef:
+    #    kind: Task
+    #    name: debug-files
+    #  workspaces:
+    #    - name: source
+    #      workspace: workspace  
+{{- if eq .Values.builderType "python" }}
     - name: build
       params:
         - name: IMAGE
@@ -43,15 +56,56 @@ spec:
         - name: TLSVERIFY
           value: 'false'
         - name: PATH_CONTEXT
-          value: 'src'
+          value: $(params.GIT_CONTEXT_DIR)
       runAfter:
-        - fetch-repository
+        - debug
       taskRef:
         kind: ClusterTask
         name: s2i-python-3
       workspaces:
         - name: source
           workspace: workspace
+{{- end }}
+{{- if eq .Values.builderType "buildah" }}
+    - name: build
+      params:
+        - name: IMAGE
+          value: $(params.IMAGE_NAME)
+{{- if .Values.buildah.builderImage }}
+        - name: BUILDER_IMAGE
+          value: '{{ .Values.buildah.builderImage }}'
+{{- end }}
+        - name: CONTEXT
+          value: $(params.GIT_CONTEXT_DIR)
+        - name: TLSVERIFY
+          value: 'false'
+      runAfter:
+        - fetch-repository
+      taskRef:
+        kind: ClusterTask
+        name: buildah
+      workspaces:
+        - name: source
+          workspace: workspace
+{{- end }}
+{{- if eq .Values.builderType "java11" }}
+    - name: build
+      params:
+        - name: IMAGE
+          value: $(params.IMAGE_NAME)
+        - name: TLSVERIFY
+          value: 'false'
+        - name: PATH_CONTEXT
+          value: $(params.GIT_CONTEXT_DIR)
+      runAfter:
+        - fetch-repository
+      taskRef:
+        kind: ClusterTask
+        name: s2i-java-11
+      workspaces:
+        - name: source
+          workspace: workspace
+{{- end }}
     - name: kn-deploy
       params:
         - name: ARGS
@@ -68,6 +122,29 @@ spec:
         name: kn
   workspaces:
     - name: workspace
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}
+  name: debug-files
+  namespace: {{ .Values.namespace }}
+spec:
+  workspaces:
+  - name: source
+  params:
+    - name: imageTag
+      description: The image tag
+      default: '*'
+  steps:
+  - name: git-debug1
+    image: quay.io/openshift-pipeline/openshift-cli:latest
+    workingDir: /workspace/source
+    command: ["/bin/bash"]
+    args:
+      - '-c'
+      - ls -lrtR .
 
 
 
