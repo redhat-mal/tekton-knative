@@ -1,5 +1,5 @@
-#FROM image-registry.openshift-image-registry.svc:5000/openshift/java:11
-FROM registry.redhat.io/openjdk/openjdk-11-rhel7
+FROM image-registry.openshift-image-registry.svc:5000/openshift/java:11
+#FROM registry.redhat.io/openjdk/openjdk-11-rhel7
 COPY . /project
 WORKDIR /project
 # uncomment this to set the MAVEN_MIRROR_URL of your choice, to make faster builds
