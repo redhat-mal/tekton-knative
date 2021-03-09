@@ -12,7 +12,7 @@ RUN /opt/rh/rh-maven36/root/usr/bin/mvn -DskipTests package
 #USER jboss
 ENV JAVA_APP_DIR=/deployments
 
-RUN cp /project/target/*.runner.jar /deployments/
+RUN cp /project/target/*-runner.jar /deployments/
 #COPY ./mvnw /deployments/
 
 EXPOSE "8080"
