@@ -9,9 +9,9 @@ entries:
     keywords:
     - tekton
     - devops
-    name: bofa-standard-pipeline
+    name: pipelines
     sources:
     #- https://github.com/aerospike/aerospike-server
     urls:
-    - pipeline-0.1.2.tgz
+    - pipelines-0.1.2.tgz
     version: 0.1.2
