@@ -1,0 +1,25 @@
+---
+# Source: bofa-tekton/templates/standard-build.yaml
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  labels:
+    app.kubernetes.io/name: RELEASE-NAME
+  name: debug-files
+  namespace: bofa-samples
+spec:
+  workspaces:
+  - name: source
+  params:
+    - name: imageTag
+      description: The image tag
+      default: '*'
+  steps:
+  - name: git-debug1
+    image: quay.io/openshift-pipeline/openshift-cli:latest
+    workingDir: /workspace/source
+    command: ["/bin/bash"]
+    args:
+      - '-c'
+      - ls -lrtR .
+

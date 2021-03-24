@@ -1,0 +1,9 @@
+commonLabels:
+  tekton-pipeine: standard 
+resources:
+- standard-pipeline/standard-pipeline.yaml
+- tasks/task-debug.yaml
+- pipeline-run/run-storage.yaml
+- pipeline-run/pipeline-role.yaml
+- pipeline-run/run-standard.yaml 
+#- github.com/kubernetes-sigs/kustomize/examples/multibases?ref=v1.0.6

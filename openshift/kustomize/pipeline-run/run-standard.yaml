@@ -1,0 +1,28 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  labels:
+    tekton-pipeine: standard
+    tekton.dev/pipeline: bofa-standard-java11
+  name: bofa-standard-java11-rvhrn2
+  namespace: bofa-samples
+spec:
+  params:
+  - name: APP_NAME
+    value: hello-world
+  - name: GIT_REPO
+    value: https://github.com/redhat-mal/tekton-knative.git
+  - name: GIT_CONTEXT_DIR
+    value: samples/quarkus-greeting
+  - name: GIT_REVISION
+    value: main
+  - name: IMAGE_NAME
+    value: image-registry.openshift-image-registry.svc:5000/bofa-samples/hello-world
+  pipelineRef:
+    name: bofa-standard-java11
+  serviceAccountName: pipeline
+  timeout: 1h0m0s
+  workspaces:
+  - name: workspace
+    persistentVolumeClaim:
+      claimName: tekton-ws

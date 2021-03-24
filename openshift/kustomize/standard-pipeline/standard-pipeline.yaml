@@ -1,0 +1,83 @@
+---
+# Source: bofa-tekton/templates/standard-build.yaml
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: bofa-standard-java11
+  namespace: bofa-samples
+spec:
+  params:
+    - default: hello-world
+      name: APP_NAME
+      type: string
+    - default: 'https://github.com/redhat-mal/tekton-knative.git'
+      name: GIT_REPO
+      type: string
+    - name: GIT_CONTEXT_DIR
+      type: string
+      default: samples/quarkus-greeting
+    - default: main
+      name: GIT_REVISION
+      type: string
+    - default: >-
+        image-registry.openshift-image-registry.svc:5000/bofa-samples/hello-world
+      name: IMAGE_NAME
+      type: string
+  tasks:
+    - name: fetch-repository
+      params:
+        - name: url
+          value: $(params.GIT_REPO)
+        - name: revision
+          value: $(params.GIT_REVISION)
+        - name: deleteExisting
+          value: 'true'
+        - name: subdirectory
+          value: ''
+      taskRef:
+        kind: ClusterTask
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: workspace
+    #- name: debug
+    #  runAfter:
+    #  - fetch-repository
+    #  taskRef:
+    #    kind: Task
+    #    name: debug-files
+    #  workspaces:
+    #    - name: source
+    #      workspace: workspace
+    - name: build
+      params:
+        - name: IMAGE
+          value: $(params.IMAGE_NAME)
+        - name: TLSVERIFY
+          value: 'false'
+        - name: PATH_CONTEXT
+          value: $(params.GIT_CONTEXT_DIR)
+      runAfter:
+        - fetch-repository
+      taskRef:
+        kind: ClusterTask
+        name: s2i-java-11
+      workspaces:
+        - name: source
+          workspace: workspace
+    - name: kn-deploy
+      params:
+        - name: ARGS
+          value:
+            - service 
+            - create
+            - $(params.APP_NAME)
+            - --force
+            - "--image=$(params.IMAGE_NAME)"
+      runAfter:
+        - build
+      taskRef:
+        kind: ClusterTask
+        name: kn
+  workspaces:
+    - name: workspace
